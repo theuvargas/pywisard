@@ -1,7 +1,5 @@
 import numpy as np
 
-print("oi")
-
 
 class BloomFilter:
     def __init__(self, size: int, num_hashes: int, dtype: type = bool, hash_fn=hash):
