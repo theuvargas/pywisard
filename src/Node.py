@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from BloomFilter import BloomFilter
+from collections.abc import Callable
 
 
-class Discriminator(ABC):
+class Node(ABC):
     @abstractmethod
     def get_response(self, input: str) -> int:
         return 0
@@ -12,7 +13,7 @@ class Discriminator(ABC):
         return None
 
 
-class DictDiscriminator(Discriminator):
+class DictNode(Node):
     def __init__(self):
         self.dictionary = {}
 
@@ -29,12 +30,18 @@ class DictDiscriminator(Discriminator):
         return str(self.dictionary)
 
 
-class BloomDiscriminator(Discriminator):
-    def __init__(self, bloom_size: int, num_hashes: int):
-        self.bloom_filter = BloomFilter(bloom_size, num_hashes)
+class BloomNode(Node):
+    def __init__(
+        self,
+        bloom_size: int,
+        num_hashes: int,
+        dtype: type = bool,
+        hash_fn: Callable = hash,
+    ):
+        self.bloom_filter = BloomFilter(bloom_size, num_hashes, dtype, hash_fn)
 
     def get_response(self, input: str) -> int:
-        return self.bloom_filter.is_member(input)
+        return int(self.bloom_filter.is_member(input))
 
     def train(self, input: str):
         self.bloom_filter.add(input)
