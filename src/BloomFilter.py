@@ -1,8 +1,11 @@
 import numpy as np
+from collections.abc import Callable
 
 
 class BloomFilter:
-    def __init__(self, size: int, num_hashes: int, dtype: type = bool, hash_fn=hash):
+    def __init__(
+        self, size: int, num_hashes: int, dtype: type = bool, hash_fn: Callable = hash
+    ):
         self.arr = np.zeros(size, dtype=dtype)
         self.num_hashes = num_hashes
         self.hash_fn = hash_fn
@@ -18,3 +21,6 @@ class BloomFilter:
             if not self.arr[hash_val]:
                 return False
         return True
+
+    def __contains__(self, item: str) -> bool:
+        return self.is_member(item)
