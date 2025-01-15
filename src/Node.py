@@ -18,14 +18,15 @@ class Node(ABC):
 
 
 class DictNode(Node):
-    def __init__(self):
+    def __init__(self, dtype: type = int):
         self.memory = {}
+        self.dtype = dtype
 
     def get_response(self, input: str) -> int:
         return self.memory.get(input, 0)
 
     def train(self, input: str):
-        if input in self.memory:
+        if input in self.memory and self.dtype != bool:
             self.memory[input] += 1
         else:
             self.memory[input] = 1
