@@ -12,22 +12,32 @@ class Node(ABC):
     def train(self, input: str) -> None:
         return None
 
+    @abstractmethod
+    def untrain(self, input: str) -> None:
+        return None
+
 
 class DictNode(Node):
     def __init__(self):
-        self.dictionary = {}
+        self.memory = {}
 
     def get_response(self, input: str) -> int:
-        return self.dictionary.get(input, 0)
+        return self.memory.get(input, 0)
 
     def train(self, input: str):
-        if input in self.dictionary:
-            self.dictionary[input] += 1
+        if input in self.memory:
+            self.memory[input] += 1
         else:
-            self.dictionary[input] = 1
+            self.memory[input] = 1
+
+    def untrain(self, input: str) -> None:
+        if input not in self.memory or self.memory[input] == 0:
+            raise KeyError(f"Cannot untrain '{input}' as it is not in memory")
+
+        self.memory[input] -= 1
 
     def __str__(self):
-        return str(self.dictionary)
+        return str(self.memory)
 
 
 class BloomNode(Node):
@@ -38,13 +48,19 @@ class BloomNode(Node):
         dtype: type = bool,
         hash_fn: Callable = hash,
     ):
-        self.bloom_filter = BloomFilter(bloom_size, num_hashes, dtype, hash_fn)
+        self.memory = BloomFilter(bloom_size, num_hashes, dtype, hash_fn)
 
     def get_response(self, input: str) -> int:
-        return int(self.bloom_filter.is_member(input))
+        return int(self.memory.is_member(input))
 
     def train(self, input: str):
-        self.bloom_filter.add(input)
+        self.memory.add(input)
+
+    def untrain(self, input: str) -> None:
+        if input not in self.memory:
+            raise KeyError(f"Cannot untrain '{input}' as it is not in memory")
+
+        self.memory.delete(input)
 
     def __str__(self):
-        return str(self.bloom_filter.arr)
+        return str(self.memory.arr)

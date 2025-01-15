@@ -9,11 +9,22 @@ class BloomFilter:
         self.arr = np.zeros(size, dtype=dtype)
         self.num_hashes = num_hashes
         self.hash_fn = hash_fn
+        self.dtype = dtype
 
     def add(self, item: str):
         for i in range(self.num_hashes):
             hash_val = self.hash_fn(item + str(i)) % len(self.arr)
             self.arr[hash_val] += 1
+
+    def delete(self, item: str):
+        if self.dtype == bool:
+            raise ValueError("Cannot delete from a binary Bloom Filter")
+
+        for i in range(self.num_hashes):
+            hash_val = self.hash_fn(item + str(i)) % len(self.arr)
+            if self.arr[hash_val] == 0:
+                raise ValueError(f"Cannot delete '{item}' as it is not in memory")
+            self.arr[hash_val] -= 1
 
     def is_member(self, item: str) -> bool:
         for i in range(self.num_hashes):
