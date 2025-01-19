@@ -44,37 +44,15 @@ def binarize_input(input: float, output_size: int, min_val: float, max_val: floa
     return binarized
 
 
-# def binarize_dataset(dataset: np.ndarray, output_size: int):
-#     min_val = dataset.min()
-#     max_val = dataset.max()
-#
-#     binarized_dataset = np.zeros((dataset.shape[0], dataset.shape[1] * output_size))
-#
-#     for i in range(dataset.shape[0]):
-#         for j in range(dataset.shape[1]):
-#             binarized_dataset[i, j * output_size : (j + 1) * output_size] = (
-#                 binarize_input(dataset[i, j], output_size, min_val, max_val)
-#             )
-#
-#     return binarized_dataset
-
-
-def binarize_dataset(dataset: np.ndarray, output_size: int):
+def binarize_dataset(dataset: np.ndarray, bits_per_input: int):
     min_val = dataset.min()
     max_val = dataset.max()
 
-    # Create thermometer levels for comparison
-    thermometer = np.linspace(min_val, max_val, output_size)
+    thermometer = np.linspace(min_val, max_val, bits_per_input)
 
-    # Reshape dataset and thermometer for broadcasting
-    # dataset shape: (n_samples, n_features, 1)
-    # thermometer shape: (1, 1, output_size)
     reshaped_data = dataset.reshape(dataset.shape[0], dataset.shape[1], 1)
     reshaped_thermometer = thermometer.reshape(1, 1, -1)
 
-    # Compare in one operation
-    # This creates a (n_samples, n_features, output_size) boolean array
     binarized = (reshaped_data >= reshaped_thermometer).astype(np.float32)
 
-    # Reshape to match original output format
     return binarized.reshape(dataset.shape[0], -1)
