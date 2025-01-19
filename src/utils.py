@@ -31,15 +31,13 @@ def get_mnist():
     )
 
 
-def binarize_input(input: float, output_size: int, min_val: float, max_val: float):
-    binarized = np.ones(output_size)
-    thermometer = np.linspace(min_val, max_val, output_size + 1, endpoint=False)[1:]
+def binarize_input(input: float, output_size: int, thermometer: np.ndarray):
+    binarized = np.ones(output_size, dtype=np.int8)
 
-    print(thermometer)
-    for i in range(output_size - 1, 1, -1):
+    for i in range(output_size - 1, -1, -1):
         if input > thermometer[i]:
             break
-        binarized[i] = 0
+        binarized[i] = "0"
 
     return binarized
 
@@ -48,11 +46,17 @@ def binarize_dataset(dataset: np.ndarray, bits_per_input: int):
     min_val = dataset.min()
     max_val = dataset.max()
 
-    thermometer = np.linspace(min_val, max_val, bits_per_input)
+    thermometer = np.linspace(min_val, max_val, bits_per_input + 1, endpoint=False)[1:]
 
-    reshaped_data = dataset.reshape(dataset.shape[0], dataset.shape[1], 1)
-    reshaped_thermometer = thermometer.reshape(1, 1, -1)
+    binarized = np.zeros(
+        (dataset.shape[0], dataset.shape[1] * bits_per_input), dtype=str
+    )
 
-    binarized = (reshaped_data >= reshaped_thermometer).astype(np.float32)
+    for row in range(dataset.shape[0]):
+        for col in range(dataset.shape[1]):
+            num = binarize_input(dataset[row, col], bits_per_input, thermometer).astype(
+                str
+            )
+            binarized[row, col * bits_per_input : (col + 1) * bits_per_input] = num
 
-    return binarized.reshape(dataset.shape[0], -1)
+    return binarized
