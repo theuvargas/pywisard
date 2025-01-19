@@ -22,8 +22,9 @@ class DictNode(Node):
         self.memory = {}
         self.dtype = dtype
 
-    def get_response(self, input: str) -> int:
-        return self.memory.get(input, 0)
+    def get_response(self, input: str, threshold: int = 1) -> int:
+        value = self.memory.get(input, 0)
+        return 1 if value >= threshold else 0
 
     def train(self, input: str):
         if input in self.memory and self.dtype != bool:
