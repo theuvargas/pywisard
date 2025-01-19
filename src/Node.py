@@ -51,16 +51,15 @@ class BloomNode(Node):
     ):
         self.memory = BloomFilter(bloom_size, num_hashes, dtype, hash_fn)
 
-    def get_response(self, input: str) -> int:
-        return int(self.memory.is_member(input))
+    def get_response(self, input: str, threshold: int = 1) -> int:
+        min_val = self.memory.min_membership(input)
+
+        return 1 if min_val >= threshold else 0
 
     def train(self, input: str):
         self.memory.add(input)
 
     def untrain(self, input: str) -> None:
-        if input not in self.memory:
-            raise KeyError(f"Cannot untrain '{input}' as it is not in memory")
-
         self.memory.delete(input)
 
     def __str__(self):

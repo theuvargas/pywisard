@@ -14,7 +14,10 @@ class BloomFilter:
     def add(self, item: str):
         for i in range(self.num_hashes):
             hash_val = self.hash_fn(item + str(i)) % len(self.arr)
-            self.arr[hash_val] += 1
+            if self.dtype == bool:
+                self.arr[hash_val] = 1
+            else:
+                self.arr[hash_val] += 1
 
     def delete(self, item: str):
         if self.dtype == bool:
@@ -23,15 +26,12 @@ class BloomFilter:
         for i in range(self.num_hashes):
             hash_val = self.hash_fn(item + str(i)) % len(self.arr)
             if self.arr[hash_val] == 0:
-                raise ValueError(f"Cannot delete '{item}' as it is not in memory")
+                return
             self.arr[hash_val] -= 1
 
-    def is_member(self, item: str) -> bool:
+    def min_membership(self, item: str) -> int:
+        vals = []
         for i in range(self.num_hashes):
             hash_val = self.hash_fn(item + str(i)) % len(self.arr)
-            if not self.arr[hash_val]:
-                return False
-        return True
-
-    def __contains__(self, item: str) -> bool:
-        return self.is_member(item)
+            vals.append(self.arr[hash_val])
+        return min(vals)
