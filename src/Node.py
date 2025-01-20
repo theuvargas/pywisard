@@ -1,19 +1,20 @@
 from abc import ABC, abstractmethod
 from BloomFilter import BloomFilter
 from collections.abc import Callable
+import numpy as np
 
 
 class Node(ABC):
     @abstractmethod
-    def get_response(self, input: str) -> int:
+    def get_response(self, input: tuple[np.int8]) -> int:
         return 0
 
     @abstractmethod
-    def train(self, input: str) -> None:
+    def train(self, input: tuple[np.int8]) -> None:
         return None
 
     @abstractmethod
-    def untrain(self, input: str) -> None:
+    def untrain(self, input: tuple[np.int8]) -> None:
         return None
 
 
@@ -22,17 +23,17 @@ class DictNode(Node):
         self.memory = {}
         self.dtype = dtype
 
-    def get_response(self, input: str, threshold: int = 1) -> int:
+    def get_response(self, input: tuple[np.int8], threshold: int = 1) -> int:
         value = self.memory.get(input, 0)
         return 1 if value >= threshold else 0
 
-    def train(self, input: str) -> None:
+    def train(self, input: tuple[np.int8]) -> None:
         if input in self.memory and self.dtype != bool:
             self.memory[input] += 1
         else:
             self.memory[input] = 1
 
-    def untrain(self, input: str) -> None:
+    def untrain(self, input: tuple[np.int8]) -> None:
         if input not in self.memory or self.memory[input] == 0:
             raise KeyError(f"Cannot untrain '{input}' as it is not in memory")
 

@@ -48,4 +48,4 @@ def binarize_dataset(dataset: np.ndarray, bits_per_input: int):
         :
     ] = comparisons
 
-    return binarized.astype(str)
+    return binarized
