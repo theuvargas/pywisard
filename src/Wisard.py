@@ -26,7 +26,6 @@ class DictWisard:
     def predict(self, X_test: np.ndarray) -> np.ndarray:
         X_bin_test = binarize_dataset(X_test, self.bits_per_input)
         y_pred = np.zeros(X_bin_test.shape[0])
-        bleachs = []
 
         for i, x in enumerate(X_bin_test):
             scores = {}
@@ -35,6 +34,11 @@ class DictWisard:
                 for c, discriminator in self.discriminators.items():
                     scores[c] = discriminator.get_response(x, bleaching)
                 max_val = max(scores.values())
+                if max_val == 0:  # prevents infinite loop
+                    bleaching -= 10
+                    for c, discriminator in self.discriminators.items():
+                        scores[c] = discriminator.get_response(x, bleaching)
+                    break
                 num_max = 0
                 for score in scores.values():
                     if score == max_val:
@@ -43,12 +47,10 @@ class DictWisard:
                             break
                 if num_max == 1:
                     break
-                bleaching += 1
+                bleaching += 10
 
             y_pred[i] = max(scores, key=scores.get)
-            bleachs.append(bleaching)
 
-        print("Bleachings: ", bleachs)
         return y_pred
 
     def _create_mapping(self, input_size: int):
