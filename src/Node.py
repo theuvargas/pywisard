@@ -5,11 +5,11 @@ from collections.abc import Callable
 
 class Node(ABC):
     @abstractmethod
-    def get_response(self, input: int) -> int:
+    def get_response(self, input: str) -> int:
         return 0
 
     @abstractmethod
-    def train(self, input: int) -> None:
+    def train(self, input: str) -> None:
         return None
 
     @abstractmethod
@@ -22,11 +22,11 @@ class DictNode(Node):
         self.memory = {}
         self.dtype = dtype
 
-    def get_response(self, input: int, threshold: int = 1) -> int:
+    def get_response(self, input: str, threshold: int = 1) -> int:
         value = self.memory.get(input, 0)
         return 1 if value >= threshold else 0
 
-    def train(self, input: int):
+    def train(self, input: str) -> None:
         if input in self.memory and self.dtype != bool:
             self.memory[input] += 1
         else:

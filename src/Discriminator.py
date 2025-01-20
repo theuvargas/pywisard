@@ -10,14 +10,12 @@ class DictDiscriminator:
     def train(self, X_train: np.ndarray):
         for row in X_train:
             for i, node in enumerate(self.nodes):
-                # tup = "".join(row[j] for j in self.mapping[i])
-                tup = hash(tuple(row[j] for j in self.mapping[i]))
+                tup = "".join(row[self.mapping[i]])
                 node.train(tup)
 
-    def get_response(self, row: np.ndarray, threshold: int = 1) -> int:
-        response = 0
-        for i, node in enumerate(self.nodes):
-            # tup = "".join(row_str[j] for j in self.mapping[i])
-            tup = hash(tuple(row[j] for j in self.mapping[i]))
-            response += node.get_response(tup, threshold)
-        return response
+    def get_response(self, row: np.ndarray, bleaching: int = 1) -> int:
+        indices = np.array([self.mapping[i] for i in range(len(self.nodes))])
+        tuples = np.array(["".join(r) for r in row[indices]])
+        return sum(
+            node.get_response(tup, bleaching) for tup, node in zip(tuples, self.nodes)
+        )
