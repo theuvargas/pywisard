@@ -53,15 +53,15 @@ class BloomNode(Node):
     ):
         self.memory = BloomFilter(bloom_size, num_hashes, dtype, hash_fn)
 
-    def get_response(self, input: str, threshold: int = 1) -> int:
+    def get_response(self, input: tuple[np.int8], threshold: int = 1) -> int:
         min_val = self.memory.min_membership(input)
 
         return 1 if min_val >= threshold else 0
 
-    def train(self, input: str):
+    def train(self, input: tuple[np.int8]):
         self.memory.add(input)
 
-    def untrain(self, input: str) -> None:
+    def untrain(self, input: tuple[np.int8]) -> None:
         self.memory.delete(input)
 
     def __str__(self):

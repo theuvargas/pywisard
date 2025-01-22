@@ -10,28 +10,35 @@ class BloomFilter:
         self.num_hashes = num_hashes
         self.hash_fn = hash_fn
         self.dtype = dtype
+        self.hash_shift = 4
 
-    def add(self, item: str):
+    def add(self, item: tuple[np.int8]):
+        h = self.hash_fn(item)
+        h2 = h >> self.hash_shift
         for i in range(self.num_hashes):
-            hash_val = self.hash_fn(item + str(i)) % len(self.arr)
+            hash_val = (h + i * h2) % len(self.arr)
             if self.dtype == bool:
                 self.arr[hash_val] = 1
             else:
                 self.arr[hash_val] += 1
 
-    def delete(self, item: str):
+    def delete(self, item: tuple[np.int8]):
         if self.dtype == bool:
             raise ValueError("Cannot delete from a binary Bloom Filter")
 
+        h = self.hash_fn(item)
+        h2 = h >> self.hash_shift
         for i in range(self.num_hashes):
-            hash_val = self.hash_fn(item + str(i)) % len(self.arr)
+            hash_val = (h + i * h2) % len(self.arr)
             if self.arr[hash_val] == 0:
                 return
             self.arr[hash_val] -= 1
 
-    def min_membership(self, item: str) -> int:
+    def min_membership(self, item: tuple[np.int8]) -> int:
+        h = self.hash_fn(item)
+        h2 = h >> self.hash_shift
         vals = []
         for i in range(self.num_hashes):
-            hash_val = self.hash_fn(item + str(i)) % len(self.arr)
+            hash_val = (h + i * h2) % len(self.arr)
             vals.append(self.arr[hash_val])
         return min(vals)
