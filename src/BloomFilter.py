@@ -1,5 +1,6 @@
 import numpy as np
 from collections.abc import Callable
+import math
 
 
 class BloomFilter:
@@ -42,3 +43,13 @@ class BloomFilter:
             hash_val = (h + i * h2) % len(self.arr)
             vals.append(self.arr[hash_val])
         return min(vals)
+
+
+def bloom_filter_parameters(n, p) -> tuple[int, int]:
+    m = -(n * math.log(p)) / (math.log(2) ** 2)
+    k = (m / n) * math.log(2)
+
+    m = math.ceil(m)
+    k = round(k)
+
+    return m, k
