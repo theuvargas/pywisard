@@ -3,9 +3,15 @@ from Node import BloomNode, DictNode
 
 
 class DictDiscriminator:
-    def __init__(self, n_nodes: int, mapping: dict[int, np.ndarray]):
+    def __init__(
+        self,
+        n_nodes: int,
+        mapping: dict[int, np.ndarray],
+        dtype: type,
+        withBleaching: bool,
+    ):
         self.mapping = mapping
-        self.nodes = [DictNode() for _ in range(n_nodes)]
+        self.nodes = [DictNode(dtype, withBleaching) for _ in range(n_nodes)]
 
     def train(self, X_train: np.ndarray):
         for row in X_train:
@@ -28,9 +34,14 @@ class BloomDiscriminator:
         mapping: dict[int, np.ndarray],
         bloom_size: int,
         num_hashes: int,
+        dtype: type,
+        withBleaching: bool,
     ) -> None:
         self.mapping = mapping
-        self.nodes = [BloomNode(bloom_size, num_hashes) for _ in range(n_nodes)]
+        self.nodes = [
+            BloomNode(bloom_size, num_hashes, dtype, withBleaching)
+            for _ in range(n_nodes)
+        ]
 
     def train(self, X_train: np.ndarray) -> None:
         for row in X_train:

@@ -5,12 +5,21 @@ from utils import binarize_dataset
 
 
 class Wisard(ABC):
-    def __init__(self, n_tuples: int, n_nodes: int, bits_per_input: int):
+    def __init__(
+        self,
+        n_tuples: int,
+        n_nodes: int,
+        bits_per_input: int,
+        dtype: type = int,
+        withBleaching: bool = True,
+    ):
         self.n_tuples = n_tuples
         self.n_nodes = n_nodes
         self.bits_per_input = bits_per_input
         self.discriminators = {}
         self.mapping = {}
+        self.dtype = dtype
+        self.withBleaching = withBleaching
 
     @abstractmethod
     def _create_discriminator(
@@ -55,6 +64,9 @@ class Wisard(ABC):
             self.mapping[node] = rng.integers(0, input_size, size=self.n_tuples)
 
     def _should_break(self, scores: dict) -> bool:
+        if not self.withBleaching:
+            return True
+
         max_val = max(scores.values())
         if max_val == 0:
             return True
@@ -73,7 +85,7 @@ class DictWisard(Wisard):
     def _create_discriminator(
         self, mapping: dict[int, np.ndarray]
     ) -> DictDiscriminator:
-        return DictDiscriminator(self.n_nodes, mapping)
+        return DictDiscriminator(self.n_nodes, mapping, self.dtype, self.withBleaching)
 
 
 class BloomWisard(Wisard):
@@ -84,8 +96,10 @@ class BloomWisard(Wisard):
         bits_per_input: int,
         bloom_size: int,
         num_hashes: int,
+        dtype: type = int,
+        withBleaching: bool = True,
     ):
-        super().__init__(n_tuples, n_nodes, bits_per_input)
+        super().__init__(n_tuples, n_nodes, bits_per_input, dtype, withBleaching)
         self.bloom_size = bloom_size
         self.num_hashes = num_hashes
 
@@ -97,4 +111,6 @@ class BloomWisard(Wisard):
             mapping,
             self.bloom_size,
             self.num_hashes,
+            self.dtype,
+            self.withBleaching,
         )
