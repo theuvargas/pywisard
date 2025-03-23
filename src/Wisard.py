@@ -31,8 +31,8 @@ class Wisard(ABC):
         X_bin_train = binarize_dataset(X_train, self.bits_per_input)
         self._create_mapping(X_bin_train.shape[1])
 
-        classes = np.unique(y_train)
-        for c in classes:
+        self.classes = np.unique(y_train)
+        for c in self.classes:
             x = X_bin_train[y_train == c]
             discriminator = self._create_discriminator(self.mapping)
             discriminator.train(x)
@@ -55,6 +55,26 @@ class Wisard(ABC):
                 bleaching = self._adjust_bleaching(scores, bleaching)
 
             y_pred[i] = max(scores, key=scores.get)
+
+        return y_pred
+
+    def predict_proba(self, X_test: np.ndarray) -> list[dict]:
+        X_bin_test = binarize_dataset(X_test, self.bits_per_input)
+        y_pred = []
+
+        for i, x in enumerate(X_bin_test):
+            scores = {}
+            bleaching = 1
+            while True:
+                for c, discriminator in self.discriminators.items():
+                    scores[c] = discriminator.get_response(x, bleaching)
+
+                if self._should_break(scores):
+                    break
+
+                bleaching = self._adjust_bleaching(scores, bleaching)
+
+            y_pred.append(scores)
 
         return y_pred
 
