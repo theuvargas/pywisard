@@ -31,9 +31,7 @@ def get_mnist():
     )
 
 
-def binarize_dataset(dataset: np.ndarray, bits_per_input: int):
-    min_val = dataset.min()
-    max_val = dataset.max()
+def binarize_dataset(dataset: np.ndarray, bits_per_input: int, min_val=0, max_val=1):
     thermometer = np.linspace(min_val, max_val, bits_per_input + 1, endpoint=False)[1:]
 
     dataset_expanded = dataset.reshape(dataset.shape[0], dataset.shape[1], 1)
