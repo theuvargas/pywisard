@@ -304,11 +304,9 @@ def main():
     print(
         f"Surrogate Attack Success Rate (on itself): {surrogate_attack_success_rate:.4f}"
     )
+    print(f"Transfer Attack Success Rate to Wisard: {transfer_attack_success_rate:.4f}")
     print(
-        f"** Transfer Attack Success Rate to Wisard: {transfer_attack_success_rate:.4f} **"
-    )
-    print(
-        f"   ({num_transferred} out of {len(successful_adv_inputs_np)} successful surrogate attacks transferred)"
+        f"({num_transferred} out of {len(successful_adv_inputs_np)} successful surrogate attacks transferred)"
     )
     print("=" * 70)
 
