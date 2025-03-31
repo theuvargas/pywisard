@@ -4,17 +4,15 @@ from utils import get_mnist
 import time
 import numpy as np
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 import foolbox as fb
 from foolbox.criteria import Misclassification  # Import criterion directly
 
-# --- Configuration ---
 # Wisard Params
 N_TUPLES = 48
-N_NODES = 150
+N_NODES = 50
 BITS_PER_INPUT = 4
 WITH_BLEACHING = False
 N_JOBS = -1  # Use all available cores
@@ -25,26 +23,17 @@ SURROGATE_HIDDEN_SIZE2 = 128  # Example size
 SURROGATE_LR = 1e-3
 SURROGATE_EPOCHS = 20
 BATCH_SIZE = 128
-# TEMPERATURE is no longer needed for CrossEntropy
 
 # Foolbox Attack Params
-# Epsilon for MNIST (assuming data scaled [0, 1])
-# Epsilon value depends heavily on the chosen attack norm (L2 vs Linf)
-# For Linf attacks, epsilons like 0.1, 0.15, 0.2 are common for [0,1] data
-# For L2 attacks, epsilons like 1.0, 2.0, 3.0 are common for [0,1] data
-# Adjust EPSILON based on the chosen ATTACK
-EPSILON = 0.1  # Example for LinfMomentumIterativeFastGradientMethod
-# Choose your attack (uncomment one)
-# ATTACK = fb.attacks.mi_fgsm.L2MomentumIterativeFastGradientMethod()
+EPSILON = 3  # Example for LinfMomentumIterativeFastGradientMethod
+ATTACK = fb.attacks.mi_fgsm.L2MomentumIterativeFastGradientMethod()
 # ATTACK = fb.attacks.L2AdamPGD() # L2 attack, might need larger EPSILON
 # ATTACK = fb.attacks.L2PGD() # L2 attack, might need larger EPSILON
-ATTACK = fb.attacks.mi_fgsm.LinfMomentumIterativeFastGradientMethod()
+# ATTACK = fb.attacks.mi_fgsm.LinfMomentumIterativeFastGradientMethod()
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
-
-# Removed generate_soft_targets function
 
 
 def train_wisard(wisard: Wisard, X_train, y_train):
@@ -74,7 +63,7 @@ def train_surrogate_hard(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
-        num_workers=4,  # Adjust based on your system
+        num_workers=4,
         pin_memory=True if device.type == "cuda" else False,
     )
 
@@ -146,7 +135,6 @@ class SurrogateMLP(nn.Module):
 def main():
     # 1. Load Data
     print("Loading MNIST data...")
-    # Assuming get_mnist returns flattened data in [0, 255] range
     X_train, y_train, X_test, y_test = get_mnist()
     print(f"Original data range: Min={X_train.min()}, Max={X_train.max()}")
     input_size = X_train.shape[1]
@@ -286,26 +274,20 @@ def main():
         )
         return
 
-    # **CRITICAL RESCALING:** Convert successful adversarial examples back to Wisard's expected range [0, 255]
-    successful_adv_inputs_np_rescaled = (
-        successful_adv_inputs_torch.cpu().numpy() * 255.0
+    successful_adv_inputs_np = (
+        successful_adv_inputs_torch.cpu().numpy().astype(X_train.dtype)
     )
-    # Ensure correct dtype for Wisard if necessary (e.g., uint8 or float32)
-    successful_adv_inputs_np_rescaled = successful_adv_inputs_np_rescaled.astype(
-        X_train.dtype
-    )
-
     original_labels_np = original_labels_for_successful.cpu().numpy()
 
     print(
-        f"Generated {len(successful_adv_inputs_np_rescaled)} successful adversarial examples for transfer testing."
+        f"Generated {len(successful_adv_inputs_np)} successful adversarial examples for transfer testing."
     )
 
     # 7. Test Transferability to Original Wisard Model
     print("\nTesting transferability to the original Wisard model...")
     start_transfer_time = time.time()
     # Predict using Wisard on the RESCALED successful adversarial examples
-    y_pred_wisard_adv = wisard.predict(successful_adv_inputs_np_rescaled)
+    y_pred_wisard_adv = wisard.predict(successful_adv_inputs_np)
     # Ensure prediction type matches for comparison
     try:
         y_pred_wisard_adv = y_pred_wisard_adv.astype(original_labels_np.dtype)
@@ -328,11 +310,9 @@ def main():
     print(
         f"Surrogate Attack Success Rate (on itself): {surrogate_attack_success_rate:.4f}"
     )
+    print(f"Transfer Attack Success Rate to Wisard: {transfer_attack_success_rate:.4f}")
     print(
-        f"** Transfer Attack Success Rate to Wisard: {transfer_attack_success_rate:.4f} **"
-    )
-    print(
-        f"   ({num_transferred} out of {len(successful_adv_inputs_np_rescaled)} successful surrogate attacks transferred)"
+        f"({num_transferred}/{len(successful_adv_inputs_np)} successful surrogate attacks transferred)"
     )
     print("=" * 70)
 

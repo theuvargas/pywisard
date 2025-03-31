@@ -27,8 +27,6 @@ BATCH_SIZE = 128
 TEMPERATURE = 1.0  # Temperature for softening Wisard probabilities
 
 # Foolbox Attack Params
-# Epsilon for MNIST (0-255 range, but we scale to 0-1 for NN)
-# Let's use a common epsilon for [0, 1] scaled data
 EPSILON = 3
 ATTACK = fb.attacks.mi_fgsm.L2MomentumIterativeFastGradientMethod()  # 30.68% (eps=3)
 # ATTACK = fb.attacks.L2AdamPGD() # 27.16% (eps=3)
@@ -169,14 +167,14 @@ def main():
     wisard_clean_accuracy = np.mean(y_pred_wisard == y_test)
     print(f"Wisard clean accuracy on test set: {wisard_clean_accuracy:.4f}")
 
-    # augment the training data with noise
-    # augmented_X_train = np.zeros((X_train.shape[0] * 2, 784), dtype=np.float32)
-    # augmented_X_train[: X_train.shape[0]] = X_train
-    # augmented_X_train[X_train.shape[0] :] = np.clip(
-    #     X_train + np.random.normal(0, 0.3), 0, 1
-    # )
-    # X_train = augmented_X_train
-    # y_train = np.concatenate([y_train, y_train])
+    print("\nAugmenting training data with noise...")
+    augmented_X_train = np.zeros((X_train.shape[0] * 2, 784), dtype=np.float32)
+    augmented_X_train[: X_train.shape[0]] = X_train
+    augmented_X_train[X_train.shape[0] :] = np.clip(
+        X_train + np.random.normal(0, 0.3), 0, 1
+    )
+    X_train = augmented_X_train
+    y_train = np.concatenate([y_train, y_train])
 
     # 3. Generate Soft Targets from Wisard for Surrogate Training
     # Use the *training* data (scaled for NN) to get targets
