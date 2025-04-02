@@ -144,6 +144,61 @@ class SurrogateMLP(nn.Module):
         return self.network(x)
 
 
+class SurrogateCNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        # Convolutional Block 1
+        self.conv1 = nn.Conv2d(
+            in_channels=1, out_channels=32, kernel_size=3, padding=1
+        )  # Output: (B, 32, 28, 28)
+        self.relu1 = nn.ReLU()
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)  # Output: (B, 32, 14, 14)
+
+        # Convolutional Block 2
+        self.conv2 = nn.Conv2d(
+            in_channels=32, out_channels=64, kernel_size=3, padding=1
+        )  # Output: (B, 64, 14, 14)
+        self.relu2 = nn.ReLU()
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)  # Output: (B, 64, 7, 7)
+
+        # Flattening will happen in the forward pass
+        # Calculate the size of the flattened features after conv/pool layers
+        # 64 channels * 7 height * 7 width = 3136 features
+        flattened_size = 64 * 7 * 7
+
+        # Fully Connected Layers
+        self.fc1 = nn.Linear(flattened_size, 128)
+        self.relu3 = nn.ReLU()
+        self.dropout = nn.Dropout(0.5)  # Regularization
+        self.fc2 = nn.Linear(128, num_classes)  # Output logits
+
+    def forward(self, x):
+        # Input x is expected to be flat (Batch, 784)
+        # Reshape to (Batch, Channels, Height, Width)
+        x = x.view(-1, 1, 28, 28)
+
+        # Pass through Conv Block 1
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
+
+        # Pass through Conv Block 2
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
+
+        # Flatten the output for the fully connected layers
+        x = x.view(x.size(0), -1)  # x.view(batch_size, 3136)
+
+        # Pass through Fully Connected Layers
+        x = self.fc1(x)
+        x = self.relu3(x)
+        x = self.dropout(x)
+        x = self.fc2(x)  # Output raw logits
+
+        return x
+
+
 def main():
     size, hashes = bloom_filter_parameters(6000, 0.05)
     wisard = BloomWisard(
@@ -184,12 +239,13 @@ def main():
     )  # Pass original data to Wisard
 
     # 4. Define and Train Surrogate Model
-    surrogate_model = SurrogateMLP(
-        input_size=784,
-        hidden_size1=SURROGATE_HIDDEN_SIZE1,
-        hidden_size2=SURROGATE_HIDDEN_SIZE2,
-        num_classes=10,
-    )
+    # surrogate_model = SurrogateMLP(
+    #     input_size=784,
+    #     hidden_size1=SURROGATE_HIDDEN_SIZE1,
+    #     hidden_size2=SURROGATE_HIDDEN_SIZE2,
+    #     num_classes=10,
+    # )
+    surrogate_model = SurrogateCNN(num_classes=10)
 
     X_train_tensor = torch.tensor(
         X_train, dtype=torch.float32
