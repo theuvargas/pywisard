@@ -33,6 +33,8 @@ ATTACK = fb.attacks.mi_fgsm.L2MomentumIterativeFastGradientMethod()  # 30.68% (e
 # ATTACK = fb.attacks.L2PGD() # 20.13% (eps=3)
 # ATTACK = fb.attacks.mi_fgsm.LinfMomentumIterativeFastGradientMethod()  # 68% (eps=0.15)
 
+WITH_AUGMENTATION = True
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -222,14 +224,15 @@ def main():
     wisard_clean_accuracy = np.mean(y_pred_wisard == y_test)
     print(f"Wisard clean accuracy on test set: {wisard_clean_accuracy:.4f}")
 
-    print("\nAugmenting training data with noise...")
-    augmented_X_train = np.zeros((X_train.shape[0] * 2, 784), dtype=np.float32)
-    augmented_X_train[: X_train.shape[0]] = X_train
-    augmented_X_train[X_train.shape[0] :] = np.clip(
-        X_train + np.random.normal(0, 0.3), 0, 1
-    )
-    X_train = augmented_X_train
-    y_train = np.concatenate([y_train, y_train])
+    if WITH_AUGMENTATION:
+        print("\nAugmenting training data with noise...")
+        augmented_X_train = np.zeros((X_train.shape[0] * 2, 784), dtype=np.float32)
+        augmented_X_train[: X_train.shape[0]] = X_train
+        augmented_X_train[X_train.shape[0] :] = np.clip(
+            X_train + np.random.normal(0, 0.3), 0, 1
+        )
+        X_train = augmented_X_train
+        y_train = np.concatenate([y_train, y_train])
 
     # 3. Generate Soft Targets from Wisard for Surrogate Training
     # Use the *training* data (scaled for NN) to get targets
