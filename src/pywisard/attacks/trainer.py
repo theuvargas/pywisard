@@ -89,6 +89,8 @@ class SurrogateTrainer:
     def adversarial_training_iteration(self, X_test_correct, y_test_correct):
         """Performs one iteration of adversarial training"""
         # Setup for foolbox attack
+        self.surrogate_model.eval()
+
         fb_model = fb.models.pytorch.PyTorchModel(
             self.surrogate_model, bounds=(0, 1), device=self.device
         )
@@ -98,7 +100,6 @@ class SurrogateTrainer:
         criterion_fb = fb.criteria.Misclassification(labels_torch)
 
         # Generate adversarial examples
-        self.surrogate_model.eval()
         print(
             f"Generating adversarial examples using {ATTACK} with epsilon={EPSILON}..."
         )
