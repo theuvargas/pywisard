@@ -1,4 +1,4 @@
-from Wisard import BloomWisard
+from pywisard.Wisard import BloomWisard
 from BloomFilter import bloom_filter_parameters
 from utils import get_mnist
 from trainer import SurrogateTrainer
