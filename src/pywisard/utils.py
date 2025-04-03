@@ -1,6 +1,8 @@
 import torchvision.datasets as dsets
 import torchvision.transforms as transforms
 import numpy as np
+import matplotlib.pyplot as plt
+import random
 
 
 def get_mnist():
@@ -47,3 +49,24 @@ def binarize_dataset(dataset: np.ndarray, bits_per_input: int, min_val=0, max_va
     ] = comparisons
 
     return binarized
+
+
+def save_adversaries(y_pred_wisard_adv, original_labels, successful_advs_np):
+    successful_transfer_indices = np.where(y_pred_wisard_adv != original_labels)[0]
+
+    if len(successful_transfer_indices) >= 3:
+        # Randomly select 3 indices
+        selected_indices = random.sample(list(successful_transfer_indices), 3)
+
+        # Save the selected adversarial images
+        for i, idx in enumerate(selected_indices):
+            plt.figure()
+            plt.imshow(successful_advs_np[idx].reshape(28, 28), cmap="gray")
+            # plt.axis("off")
+            plt.savefig(f"adv{i+1}.png")
+            plt.close()
+        print(
+            "\nSaved 3 random successful adversarial examples as adv1.png, adv2.png, and adv3.png"
+        )
+    else:
+        print("\nNot enough successful transfers to save 3 images")

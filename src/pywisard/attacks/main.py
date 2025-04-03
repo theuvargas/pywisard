@@ -1,6 +1,6 @@
 from pywisard.Wisard import BloomWisard
 from pywisard.BloomFilter import bloom_filter_parameters
-from pywisard.utils import get_mnist
+from pywisard.utils import get_mnist, save_adversaries
 from pywisard.attacks.trainer import SurrogateTrainer
 from pywisard.attacks.config import (
     N_TUPLES,
@@ -110,7 +110,6 @@ def main():
     successful_advs = clipped_advs[0][success_mask]
     original_labels = y_test_correct[success_mask.cpu().numpy()]
 
-
     if len(successful_advs) == 0:
         print("No successful adversarial examples in final attack.")
         return
@@ -119,6 +118,8 @@ def main():
     successful_advs_np = successful_advs.cpu().numpy()
     y_pred_wisard_adv = wisard.predict(successful_advs_np)
     transfer_success_rate = np.mean(y_pred_wisard_adv != original_labels)
+
+    save_adversaries(y_pred_wisard_adv, original_labels, successful_advs_np)
 
     # Print final results
     print("\n" + "=" * 30 + " Final Results " + "=" * 30)
