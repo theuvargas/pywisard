@@ -106,9 +106,10 @@ def main():
         fb_model, inputs_torch, criterion_fb, epsilons=[EPSILON]
     )
 
-    success_mask = success[0]
+    success_mask = success[0].cpu()
     successful_advs = clipped_advs[0][success_mask]
-    original_labels = y_test_correct[success_mask]
+    original_labels = y_test_correct[success_mask.cpu().numpy()]
+
 
     if len(successful_advs) == 0:
         print("No successful adversarial examples in final attack.")
