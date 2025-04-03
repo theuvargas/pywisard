@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from Discriminator import BloomDiscriminator, DictDiscriminator
-from utils import binarize_dataset
+from pywisard.Discriminator import BloomDiscriminator, DictDiscriminator
+from pywisard.utils import binarize_dataset
 from concurrent.futures import ProcessPoolExecutor
 import os
 

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from BloomFilter import BloomFilter
+from pywisard.BloomFilter import BloomFilter
 from collections.abc import Callable
 import numpy as np
 

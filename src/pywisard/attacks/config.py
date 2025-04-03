@@ -1,6 +1,6 @@
 import torch
 import foolbox as fb
-from models import SurrogateMLP
+from pywisard.attacks.models import SurrogateMLP
 
 # Device configuration
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

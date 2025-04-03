@@ -1,8 +1,8 @@
 from pywisard.Wisard import BloomWisard
-from BloomFilter import bloom_filter_parameters
-from utils import get_mnist
-from trainer import SurrogateTrainer
-from config import (
+from pywisard.BloomFilter import bloom_filter_parameters
+from pywisard.utils import get_mnist
+from pywisard.attacks.trainer import SurrogateTrainer
+from pywisard.attacks.config import (
     N_TUPLES,
     N_NODES,
     BITS_PER_INPUT,

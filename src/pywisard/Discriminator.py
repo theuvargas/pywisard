@@ -1,5 +1,5 @@
 import numpy as np
-from Node import BloomNode, DictNode
+from pywisard.Node import BloomNode, DictNode
 
 
 class DictDiscriminator:

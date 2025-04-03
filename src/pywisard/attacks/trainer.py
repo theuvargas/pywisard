@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 import time
 import foolbox as fb
-from config import (
+from pywisard.attacks.config import (
     SURROGATE_EPOCHS,
     SURROGATE_LR,
     TEMPERATURE,
