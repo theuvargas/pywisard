@@ -1,7 +1,7 @@
 from pywisard.Wisard import BloomWisard
 from pywisard.BloomFilter import bloom_filter_parameters
 from pywisard.utils import get_mnist, save_adversaries
-from pywisard.attacks.trainer import SurrogateTrainer
+from pywisard.attacks.transfer.trainer import SurrogateTrainer
 from pywisard.attacks.config import (
     N_TUPLES,
     N_NODES,
