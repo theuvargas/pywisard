@@ -39,7 +39,7 @@ def binarize_dataset(dataset: np.ndarray, bits_per_input: int, min_val=0, max_va
     dataset_expanded = dataset.reshape(dataset.shape[0], dataset.shape[1], 1)
     thermometer_expanded = thermometer.reshape(1, 1, -1)
 
-    comparisons = dataset_expanded > thermometer_expanded
+    comparisons = dataset_expanded >= thermometer_expanded
 
     binarized = np.ones(
         (dataset.shape[0], dataset.shape[1] * bits_per_input), dtype=np.int8
@@ -70,3 +70,9 @@ def save_adversaries(y_pred_wisard_adv, original_labels, successful_advs_np):
         )
     else:
         print("\nNot enough successful transfers to save 3 images")
+
+
+def save_number(image):
+    plt.figure()
+    plt.imshow(image.reshape(28, 28), cmap="gray")
+    plt.savefig("adversario")

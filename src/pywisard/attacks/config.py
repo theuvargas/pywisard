@@ -8,9 +8,10 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Wisard Parameters
 N_TUPLES = 48
 N_NODES = 50
-BITS_PER_INPUT = 6
+BITS_PER_INPUT = 1
+DTYPE = bool
 WITH_BLEACHING = False
-N_JOBS = -1
+N_JOBS = 1
 
 # Surrogate Model Parameters
 SURROGATE_MODEL = SurrogateMLP  # Direct reference to the model class
