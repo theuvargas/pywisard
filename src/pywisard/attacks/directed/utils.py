@@ -1,6 +1,5 @@
 from pywisard.Wisard import Wisard
 import numpy as np
-from numpy.random import default_rng
 
 
 def pixel_importance(model: Wisard, image: np.ndarray) -> np.ndarray:

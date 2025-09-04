@@ -82,13 +82,11 @@ class SurrogateTrainer:
         start_time = time.time()
         for epoch in range(epochs):
             avg_loss = self.train_epoch(train_loader)
-            print(f"Epoch {epoch+1}/{epochs} - Avg KL Div Loss: {avg_loss:.6f}")
+            print(f"Epoch {epoch + 1}/{epochs} - Avg KL Div Loss: {avg_loss:.6f}")
 
         print(f"Training finished in {time.time() - start_time:.2f} seconds.")
 
     def adversarial_training_iteration(self, X_test_correct, y_test_correct):
-        """Performs one iteration of adversarial training"""
-        # Setup for foolbox attack
         self.surrogate_model.eval()
 
         fb_model = fb.models.pytorch.PyTorchModel(
@@ -99,7 +97,6 @@ class SurrogateTrainer:
         labels_torch = torch.tensor(y_test_correct, dtype=torch.long).to(self.device)
         criterion_fb = fb.criteria.Misclassification(labels_torch)
 
-        # Generate adversarial examples
         print(
             f"Generating adversarial examples using {ATTACK} with epsilon={EPSILON}..."
         )
@@ -107,7 +104,6 @@ class SurrogateTrainer:
             fb_model, inputs_torch, criterion_fb, epsilons=[EPSILON]
         )
 
-        # Filter successful attacks
         success_mask = success[0]
         successful_advs = clipped_advs[0][success_mask]
 
@@ -115,7 +111,6 @@ class SurrogateTrainer:
             print("No successful adversarial examples generated. Stopping training.")
             return False
 
-        # Add successful adversarial examples to training data
         adv_inputs_np = successful_advs.cpu().numpy()
         combined_X = np.concatenate([X_test_correct, adv_inputs_np])
 

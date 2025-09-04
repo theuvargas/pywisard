@@ -43,7 +43,6 @@ def main():
         X_test[i].reshape(1, -1),
         y_test[i],
         epsilon=2,
-        # target=0,  # Optional target for targeted attack
     )
 
     print(np.linalg.norm(X_test[i] - adversary))
@@ -109,24 +108,21 @@ def generate_adversarial_example(
 
 
 def fitness(model: Wisard, image, label, target=None):
-    counts = model.predict_proba(image)[0]  # Assume returns dict {class: count}
+    counts = model.predict_proba(image)[0]
     total = sum(counts.values())
 
     if total == 0:
-        return 0  # Edge case: no discriminators activated
+        return 0
 
-    # Convert counts to probabilities
     proba = {cls: cnt / total for cls, cnt in counts.items()}
     original_prob = proba.get(label, 0)
 
     if target is not None:
-        # Targeted attack: maximize target vs original
         other_probs = [prob for cls, prob in proba.items() if cls != target]
         max_other_prob = max(other_probs)
         target_prob = proba.get(target, 0)
         return target_prob - max_other_prob
     else:
-        # Untargeted attack: maximize best competitor vs original
         other_probs = [prob for cls, prob in proba.items() if cls != label]
         max_other_prob = max(other_probs)
         if not other_probs:
@@ -166,7 +162,7 @@ def simulated_annealing(
 
         delta = candidate_fitness - current_fitness
 
-        max_exp = 20  # Prevent overflow (e^20 ≈ 4.8e8)
+        max_exp = 20
         raw_exp = delta / temperature
         clipped_exp = np.clip(raw_exp, -max_exp, max_exp)
         probability = np.exp(clipped_exp) if temperature > 1e-10 else 0

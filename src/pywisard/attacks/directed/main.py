@@ -8,7 +8,6 @@ import numpy as np
 from pywisard.utils import binarize_dataset, save_number
 from pywisard.attacks import config
 from math import inf
-import heapq
 
 
 def whitebox_attack():

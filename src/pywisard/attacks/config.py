@@ -14,7 +14,7 @@ WITH_BLEACHING = False
 N_JOBS = 1
 
 # Surrogate Model Parameters
-SURROGATE_MODEL = SurrogateMLP  # Direct reference to the model class
+SURROGATE_MODEL = SurrogateMLP
 SURROGATE_HIDDEN_SIZE1 = 256
 SURROGATE_HIDDEN_SIZE2 = 128
 SURROGATE_LR = 1e-3
